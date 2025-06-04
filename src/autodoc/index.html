@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark-dimmed.min.css"
+      media="(prefers-color-scheme: dark)"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css"
+      media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    {[head_extra]s}
+    <title>Documentation</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNTMgMTQwIj48ZyBmaWxsPSIjRjdBNDFEIj48Zz48cG9seWdvbiBwb2ludHM9IjQ2LDIyIDI4LDQ0IDE5LDMwIi8+PHBvbHlnb24gcG9pbnRzPSI0NiwyMiAzMywzMyAyOCw0NCAyMiw0NCAyMiw5NSAzMSw5NSAyMCwxMDAgMTIsMTE3IDAsMTE3IDAsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMzEsOTUgMTIsMTE3IDQsMTA2Ii8+PC9nPjxnPjxwb2x5Z29uIHBvaW50cz0iNTYsMjIgNjIsMzYgMzcsNDQiLz48cG9seWdvbiBwb2ludHM9IjU2LDIyIDExMSwyMiAxMTEsNDQgMzcsNDQgNTYsMzIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTE2LDk1IDk3LDExNyA5MCwxMDQiLz48cG9seWdvbiBwb2ludHM9IjExNiw5NSAxMDAsMTA0IDk3LDExNyA0MiwxMTcgNDIsOTUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTUwLDAgNTIsMTE3IDMsMTQwIDEwMSwyMiIvPjwvZz48Zz48cG9seWdvbiBwb2ludHM9IjE0MSwyMiAxNDAsNDAgMTIyLDQ1Ii8+PHBvbHlnb24gcG9pbnRzPSIxNTMsMjIgMTUzLDExNyAxMDYsMTE3IDEyMCwxMDUgMTI1LDk1IDEzMSw5NSAxMzEsNDUgMTIyLDQ1IDEzMiwzNiAxNDEsMjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjxwb2x5Z29uIHBvaW50cz0iMTI1LDk1IDEzMCwxMTAgMTA2LDExNyIvPjwvZz48L2c+PC9zdmc+"
+    />
+    <link href="./main.css" rel="stylesheet" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <nav>
+          <a class="logo" href="#">
+            <h1>{[logo]s}</h1>
+          </a>
+        </nav>
+        <div id="navWrap">
+          <input
+            type="search"
+            id="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="'s' to search"
+          />
+        </div>
+        {[repo_link]s}
+      </div>
+    </header>
+    <div class="container container-main">
+      <div class="col-content">
+        <div id="sectNav">
+          <ul id="listNav">
+            <li><a href="#">Loading...</a></li>
+          </ul>
+        </div>
+        <section>
+          <p id="status"></p>
+          <div id="pageHdr">
+            <div id="hdrInfo">
+              <h1 id="hdrName" class="hidden">
+                <span></span><a href="#">[src]</a>
+              </h1>
+              <p id="hdrSub" class="hidden"></p>
+            </div>
+            <div id="fnProto" class="hidden">
+              <pre><code id="fnProtoCode"></code></pre>
+            </div>
+            <div id="tldDocs" class="hidden"></div>
+          </div>
+          <div id="sectParams" class="hidden">
+            <h2>Parameters</h2>
+            <div id="listParams"></div>
+          </div>
+          <div id="sectFnErrors" class="hidden">
+            <h2>Errors</h2>
+            <div id="fnErrorsAnyError">
+              <p>
+                <span class="tok-type">anyerror</span> means the error set is
+                known only at runtime.
+              </p>
+            </div>
+            <div id="tableFnErrors"><dl id="listFnErrors"></dl></div>
+          </div>
+          <div id="sectSearchResults" class="hidden">
+            <h2>Search Results</h2>
+            <ul id="listSearchResults"></ul>
+          </div>
+          <div id="sectSearchNoResults" class="hidden">
+            <h2>No Results Found</h2>
+            <p>Press escape to exit search.</p>
+          </div>
+          <div id="sectFields" class="hidden">
+            <h2>Fields</h2>
+            <div id="listFields"></div>
+          </div>
+          <div id="sectTypes" class="hidden">
+            <h2>Types</h2>
+            <ul id="listTypes" class="columns"></ul>
+          </div>
+          <div id="sectNamespaces" class="hidden">
+            <h2>Namespaces</h2>
+            <ul id="listNamespaces" class="columns"></ul>
+          </div>
+          <div id="sectGlobalVars" class="hidden">
+            <h2>Global Variables</h2>
+            <table>
+              <tbody id="listGlobalVars"></tbody>
+            </table>
+          </div>
+          <div id="sectValues" class="hidden">
+            <h2>Values</h2>
+            <dl id="listValues"></dl>
+          </div>
+          <div id="sectFns" class="hidden">
+            <h2>Functions</h2>
+            <dl id="listFns"></dl>
+          </div>
+          <div id="sectErrSets" class="hidden">
+            <h2>Error Sets</h2>
+            <ul id="listErrSets" class="columns"></ul>
+          </div>
+          <div id="sectDocTests" class="hidden">
+            <h2>Tests</h2>
+            <pre><code id="docTestsCode"></code></pre>
+          </div>
+          <div id="sectSource" class="hidden">
+            <h2>Source Code</h2>
+            <pre><code id="sourceText"></code></pre>
+          </div>
+        </section>
+      </div>
+      <div class="col-sidebar">
+        <div id="sectPageToc" class="page-menu hidden">
+          <h3>Quick Links</h3>
+
+          <a id="tocTldDocs" class="hidden">
+            <h4>Docs</h4>
+          </a>
+
+          <a id="sectTocParams" class="hidden">
+            <h4>Parameters</h4>
+          </a>
+
+          <a id="sectTocFnErrors" class="hidden">
+            <h4>Errors</h4>
+          </a>
+
+          <a id="sectTocFields" class="hidden">
+            <h4>Fields</h4>
+          </a>
+
+          <details open id="sectTocTypes" class="hidden">
+            <summary><h4>Types</h4></summary>
+            <ul id="listTocTypes"></ul>
+          </details>
+
+          <details open id="sectTocNamespaces" class="hidden">
+            <summary><h4>Namespaces</h4></summary>
+            <ul id="listTocNamespaces"></ul>
+          </details>
+
+          <details open id="sectTocGlobalVars" class="hidden">
+            <summary><h4>Global Variables</h4></summary>
+            <ul id="listTocGlobalVars"></ul>
+          </details>
+
+          <details open id="sectTocValues" class="hidden">
+            <summary><h4>Values</h4></summary>
+            <ul id="listTocValues"></ul>
+          </details>
+
+          <details open id="sectTocFns" class="hidden">
+            <summary><h4>Functions</h4></summary>
+            <ul id="listTocFns"></ul>
+          </details>
+
+          <details open id="sectTocErrSets" class="hidden">
+            <summary><h4>Error Sets</h4></summary>
+            <ul id="listTocErrSets"></ul>
+          </details>
+
+          <a id="sectTocDocTests" class="hidden">
+            <h4>Tests</h4>
+          </a>
+
+          <a id="sectTocSource" class="hidden">
+            <h4>Source Code</h4>
+          </a>
+        </div>
+        <div class="site-menu">
+          <nav class="n5e-navigation">
+            <ul id="n5e-nav-container"></ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <div id="errors" class="hidden">
+      <h1>Errors</h1>
+      <pre id="errorsText"></pre>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
