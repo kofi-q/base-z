@@ -3,6 +3,11 @@ run-name: ${{ github.ref }} - Commit Checks
 
 on: push
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -34,13 +39,16 @@ jobs:
           zig build docs
 
       - name: Setup GitHub Pages
+        if: github.ref_name == 'main'
         uses: actions/configure-pages@v5
 
       - name: Upload GitHub Pages artifact
+        if: github.ref_name == 'main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./zig-out/docs"
 
       - name: Deploy to GitHub Pages
+        if: github.ref_name == 'main'
         id: deployment
         uses: actions/deploy-pages@v4
