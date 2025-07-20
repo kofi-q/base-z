@@ -11,7 +11,6 @@
   const CAT_type_type = 9;
   const CAT_type_function = 10;
   const CAT_type_fn_instance = 11;
-  const CAT_using_namespace = 12;
 
   const LOG_err = 0;
   const LOG_warn = 1;
@@ -116,6 +115,13 @@
   domSectTocSource.onclick = () => {
     domSectSource.scrollIntoView({ behavior: "smooth" });
   };
+
+  /** @type {import("highlight.js").HLJSApi} */
+  const hljs = window["hljs"];
+
+  hljs.configure({
+    cssSelector: `pre>code.highlight:not([data-highlighted="yes"])`,
+  });
 
   var searchTimer = null;
 
@@ -251,13 +257,6 @@
     domTldDocs.classList.add("hidden");
     domTocTldDocs.classList.add("hidden");
     domSectPageToc.classList.add("hidden");
-
-    /** @type {import("highlight.js").HLJSApi} */
-    const hljs = window["hljs"];
-
-    hljs.configure({
-      cssSelector: "pre>code.highlight",
-    });
 
     renderTitle();
 
@@ -665,9 +664,6 @@
           case CAT_alias:
             member = wasm_exports.get_aliasee();
             continue;
-
-          case CAT_using_namespace:
-            throw new Error("Unexpanded usingnamespace member returned");
 
           default:
             throw new Error(`unknown category: ${member_category}`);

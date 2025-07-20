@@ -80,13 +80,6 @@ pub fn extra_info(d: *const Decl) ExtraInfo {
             };
         },
 
-        .@"usingnamespace" => return .{
-            .name = "usingnamespace",
-            // [TODO] Fix this, so it's actually looking at the pub modifier:
-            .is_pub = true,
-            .first_doc_comment = .none,
-        },
-
         else => |t| {
             log.debug("hit '{s}'", .{@tagName(t)});
             unreachable;
