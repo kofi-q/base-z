@@ -29,7 +29,7 @@ const js = struct {
 
 pub const std_options: std.Options = .{
     .logFn = logFn,
-    .log_level = .info,
+    .log_level = .err,
 };
 
 pub fn panic(msg: []const u8, st: ?*std.builtin.StackTrace, addr: ?usize) noreturn {
@@ -665,8 +665,6 @@ export fn decl_file_path(decl_index: Decl.Index) String {
         },
 
         .alias => |target| return decl_file_path(target),
-
-        .using_namespace => unreachable,
     }
 }
 
@@ -697,7 +695,6 @@ export fn decl_category_name(decl_index: Decl.Index) String {
         .error_set => "Error Set",
         .global_const => "Constant",
         .primitive => "Primitive Value",
-        .using_namespace => "usingnamespace",
         .alias => |target| return decl_category_name(target),
     };
     return String.init(name);
@@ -824,11 +821,11 @@ fn renderMarkdownNode(
             const tag = doc.string(data.code_block.tag);
             if (tag.len > 0 and !std.mem.eql(u8, tag, "zig")) {
                 return writer.print(
-                    \\<pre><code class="highlight language-{s}">{}</code></pre>
+                    \\<pre><code class="highlight language-{s}">{f}</code></pre>
                     \\
                 , .{
                     if (tag.len > 0) tag else "none",
-                    markdown.htmlFormatter(doc.string(data.code_block.content)),
+                    markdown.fmtHtml(doc.string(data.code_block.content)),
                 });
             }
 
@@ -898,8 +895,8 @@ fn renderMarkdownNode(
                         );
                         _ = missing_feature_url_escape;
                         try writer.writeAll(search_path);
-                        try writer.print("\">{}</a>", .{
-                            markdown.htmlFormatter(content),
+                        try writer.print("\">{f}</a>", .{
+                            markdown.fmtHtml(content),
                         });
                         try writer.writeAll("</code>");
 
@@ -907,8 +904,8 @@ fn renderMarkdownNode(
                     }
 
                     try writer.writeAll("<code>");
-                    try writer.print("{}", .{
-                        markdown.htmlFormatter(content),
+                    try writer.print("{f}", .{
+                        markdown.fmtHtml(content),
                     });
                     try writer.writeAll("</code>");
                     return;
@@ -921,8 +918,8 @@ fn renderMarkdownNode(
             try writer.writeAll("<a href=\"#");
             _ = missing_feature_url_escape;
             try writer.writeAll(g.link_buffer.items);
-            try writer.print("\">{}</a>", .{
-                markdown.htmlFormatter(content),
+            try writer.print("\">{f}</a>", .{
+                markdown.fmtHtml(content),
             });
             try writer.writeAll("</code>");
         },
@@ -1164,41 +1161,14 @@ fn namespaceMembersInner(
             );
         },
 
-        .using_namespace => |mixin| {
-            switch (parent.file.categorize_expr(mixin)) {
-                .alias => |target| namespaceMembersInner(
-                    target,
-                    include_private,
-                    out_members,
-                ),
-
-                .type => unreachable,
-                .type_type => unreachable,
-                .using_namespace => unreachable,
-
-                else => namespaceMembersInner(
-                    parent.file.get().node_decls.get(mixin).?,
-                    include_private,
-                    out_members,
-                ),
-            }
-        },
-
         else => for (Walk.decls.items, 0..) |*decl, i| {
             if (decl.parent != parent_idx) continue;
 
             const member_decl_idx: Decl.Index = @enumFromInt(i);
-            switch (decl.categorize()) {
-                .using_namespace => namespaceMembersInner(
-                    member_decl_idx,
-                    include_private,
-                    out_members,
-                ),
-                else => if (include_private or decl.is_pub()) {
-                    out_members.append(gpa, member_decl_idx) catch {
-                        @panic("OOM");
-                    };
-                },
+            if (include_private or decl.is_pub()) {
+                out_members.append(gpa, member_decl_idx) catch {
+                    @panic("OOM");
+                };
             }
         },
     }

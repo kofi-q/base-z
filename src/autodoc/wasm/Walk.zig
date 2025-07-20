@@ -47,8 +47,6 @@ pub const Category = union(enum(u8)) {
     /// Type instance of a type function.
     type_fn_instance: TypeFnInstance,
 
-    using_namespace: Ast.Node.Index,
-
     pub const Tag = @typeInfo(Category).@"union".tag_type.?;
 
     pub const TypeFnInstance = struct {
@@ -153,11 +151,6 @@ pub const File = struct {
                     var buf: [1]Ast.Node.Index = undefined;
                     const full = ast.fullFnProto(&buf, node).?;
                     return categorize_func(file_index, node, full);
-                },
-
-                .@"usingnamespace" => {
-                    const namespace_node = ast.nodeData(node).node;
-                    return .{ .using_namespace = namespace_node };
                 },
 
                 else => unreachable,
@@ -281,12 +274,8 @@ pub const File = struct {
 
                 .call_one,
                 .call_one_comma,
-                .async_call_one,
-                .async_call_one_comma,
                 .call,
                 .call_comma,
-                .async_call,
-                .async_call_comma,
                 => {
                     var buf: [1]Ast.Node.Index = undefined;
                     return categorize_call(file_index, node, ast.fullCall(&buf, node).?);
@@ -540,14 +529,21 @@ fn parse(file_name: []const u8, source: anytype) Oom!Ast {
         defer ast.deinit(gpa);
 
         const token_offsets = ast.tokens.items(.start);
-        var rendered_err: std.ArrayListUnmanaged(u8) = .{};
-        defer rendered_err.deinit(gpa);
+        var rendered_err: std.Io.Writer.Allocating = .init(gpa);
+        defer rendered_err.deinit();
         for (ast.errors) |err| {
             const err_offset = token_offsets[err.token] + ast.errorOffset(err);
             const err_loc = std.zig.findLineColumn(ast.source, err_offset);
             rendered_err.clearRetainingCapacity();
-            try ast.renderError(err, rendered_err.writer(gpa));
-            log.err("{s}:{}:{}: {s}", .{ file_name, err_loc.line + 1, err_loc.column + 1, rendered_err.items });
+            ast.renderError(err, &rendered_err.writer) catch |e| switch (e) {
+                error.WriteFailed => return error.OutOfMemory,
+            };
+            log.err("{s}:{d}:{d}: {s}", .{
+                file_name,
+                err_loc.line + 1,
+                err_loc.column + 1,
+                rendered_err.getWritten(),
+            });
         }
         return Ast.parse(gpa, "", .zig);
     }
@@ -622,7 +618,6 @@ pub const Scope = struct {
         return null;
     }
 };
-var parsing_usingnamespace = false;
 
 pub fn struct_decl(
     w: *Walk,
@@ -679,14 +674,6 @@ pub fn struct_decl(
         },
 
         .@"comptime" => {
-            try w.expr(&namespace.base, parent_decl, ast.nodeData(member).node);
-        },
-
-        .@"usingnamespace" => {
-            parsing_usingnamespace = true;
-            defer parsing_usingnamespace = false;
-            _ = try w.file.add_decl(member, parent_decl);
-
             try w.expr(&namespace.base, parent_decl, ast.nodeData(member).node);
         },
 
@@ -769,7 +756,6 @@ fn expr(
     const ast = w.file.get_ast();
     switch (ast.nodeTag(node)) {
         .root => unreachable, // Top-level declaration.
-        .@"usingnamespace" => unreachable, // Top-level declaration.
         .test_decl => unreachable, // Top-level declaration.
         .container_field_init => unreachable, // Top-level declaration.
         .container_field_align => unreachable, // Top-level declaration.
@@ -869,7 +855,6 @@ fn expr(
         .@"comptime",
         .@"nosuspend",
         .@"suspend",
-        .@"await",
         .@"resume",
         .@"try",
         => try w.expr(scope, parent_decl, ast.nodeData(node).node),
@@ -922,6 +907,8 @@ fn expr(
             try w.expr(scope, parent_decl, full.ast.template);
         },
 
+        .asm_legacy => {},
+
         .builtin_call_two,
         .builtin_call_two_comma,
         .builtin_call,
@@ -934,12 +921,8 @@ fn expr(
 
         .call_one,
         .call_one_comma,
-        .async_call_one,
-        .async_call_one_comma,
         .call,
         .call_comma,
-        .async_call,
-        .async_call_comma,
         => {
             var buf: [1]Ast.Node.Index = undefined;
             const full = ast.fullCall(&buf, node).?;

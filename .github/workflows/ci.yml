@@ -13,8 +13,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-test-and-publish-docs:
+  build-test:
     runs-on: ubuntu-latest
+    steps:
+      - name: Install ZVM
+        run: |
+          curl https://raw.githubusercontent.com/tristanisham/zvm/master/install.sh | bash
+          echo PATH="~/.zvm/self:~/.zvm/bin:$PATH" >> "$GITHUB_ENV"
+
+      - name: Install Zig
+        run: |
+          zvm install 0.14.1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Test
+        run: |
+          zig build test
+
+  publish-docs:
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
     steps:
       - name: Install ZVM
         run: |
@@ -30,25 +52,18 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Test
-        run: |
-          zig build test
-
       - name: Build Docs
         run: |
           zig build docs
 
       - name: Setup GitHub Pages
-        if: github.ref_name == 'main'
         uses: actions/configure-pages@v5
 
       - name: Upload GitHub Pages artifact
-        if: github.ref_name == 'main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./zig-out/docs"
 
       - name: Deploy to GitHub Pages
-        if: github.ref_name == 'main'
         id: deployment
         uses: actions/deploy-pages@v4
