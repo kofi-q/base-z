@@ -460,7 +460,7 @@ pub fn tmpFile(bytes: []u8) !Walk.File.Index {
                 rendered_err.clearRetainingCapacity();
                 try ast.renderError(err, rendered_err.writer(gpa));
                 std.log.err(
-                    "{}:{}: {s}",
+                    "{d}:{d}: {s}",
                     .{ err_loc.line + 1, err_loc.column + 1, rendered_err.items },
                 );
             }

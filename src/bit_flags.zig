@@ -49,45 +49,22 @@ pub fn BitFlagsImpl(comptime T: type) type {
             return @bitCast(self);
         }
 
-        pub fn format(
-            self: Self,
-            comptime fmt: []const u8,
-            _: std.fmt.FormatOptions,
-            writer: std.io.AnyWriter,
-        ) !void {
-            if (comptime fmt.len == 0 or std.mem.eql(u8, fmt, "s")) {
-                try writer.writeAll("{");
+        pub fn format(self: Self, writer: *std.io.Writer) !void {
+            try writer.writeAll("{");
 
-                var count: BackingInt = 0;
-                inline for (type_info.fields) |field| {
-                    if (field.type == bool and @field(self, field.name)) {
-                        if (count > 0) try writer.writeAll(" |");
-                        try writer.writeAll(" ");
-                        try writer.writeAll(field.name);
-                        count += 1;
-                    }
+            var count: BackingInt = 0;
+            inline for (type_info.fields) |field| {
+                if (field.type == bool and @field(self, field.name)) {
+                    if (count > 0) try writer.writeAll(" |");
+                    try writer.writeAll(" ");
+                    try writer.writeAll(field.name);
+                    count += 1;
                 }
-
-                try writer.writeAll(" }");
-
-                return;
             }
 
-            if (comptime std.mem.eql(u8, fmt, "b")) {
-                const width = std.fmt.comptimePrint("{d}", .{
-                    @bitSizeOf(BackingInt),
-                });
+            try writer.writeAll(" }");
 
-                try std.fmt.format(writer, "{b:0>" ++ width ++ "}", .{
-                    @as(BackingInt, @bitCast(self)),
-                });
-
-                return;
-            }
-
-            try std.fmt.format(writer, "{" ++ fmt ++ "}", .{
-                @as(BackingInt, @bitCast(self)),
-            });
+            return;
         }
     };
 }
@@ -118,7 +95,7 @@ test BitFlagsImpl {
     try testing.expectEqual(0, empty.val());
     try testing.expectEqualStrings(
         "{ }",
-        std.fmt.comptimePrint("{s}", .{empty}),
+        std.fmt.comptimePrint("{f}", .{empty}),
     );
     try testing.expectEqual(false, empty.hasAny(.{ .do = true }));
     try testing.expectEqual(false, empty.hasAll(.{ .do = true }));
@@ -127,7 +104,7 @@ test BitFlagsImpl {
     try testing.expectEqual(0b00010101, chord_i.val());
     try testing.expectEqualStrings(
         "{ do | mi | so }",
-        std.fmt.comptimePrint("{s}", .{chord_i}),
+        std.fmt.comptimePrint("{f}", .{chord_i}),
     );
     try testing.expectEqual(true, chord_i.hasAny(.{ .do = true, .re = true }));
     try testing.expectEqual(true, chord_i.hasAny(.{ .do = true, .mi = true }));
