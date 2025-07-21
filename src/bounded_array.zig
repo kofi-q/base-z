@@ -1,4 +1,5 @@
 const std = @import("std");
+const Writer = std.io.Writer;
 
 /// A collection structure, with an array and a length, to/from which bounded,
 /// variable-length slices can be written/read.
@@ -96,13 +97,8 @@ pub fn BoundedArray(comptime T: type, comptime capacity: usize) type {
             return self.buf[0..self.len :0];
         }
 
-        pub fn format(
-            self: @This(),
-            comptime fmt: []const u8,
-            opts: std.fmt.FormatOptions,
-            writer: std.io.AnyWriter,
-        ) !void {
-            try std.fmt.formatType(self.constSlice(), fmt, opts, writer, 1);
+        pub fn format(self: @This(), writer: *Writer) Writer.Error!void {
+            try Writer.print(writer, "{s}", .{self.constSlice()});
         }
     };
 }
@@ -110,6 +106,7 @@ pub fn BoundedArray(comptime T: type, comptime capacity: usize) type {
 test BoundedArray {
     const testing = std.testing;
     const PathComponent = BoundedArray(u8, 255);
+    var print_buf: [64]u8 = undefined;
 
     var basename = PathComponent.initEmpty();
     try testing.expectEqual(basename.slice().len, 0);
@@ -125,6 +122,10 @@ test BoundedArray {
     try testing.expectEqualStrings(
         "bounded_array.zig",
         std.mem.span(basename.constSliceZ().ptr),
+    );
+    try testing.expectEqualStrings(
+        "bounded_array.zig",
+        try std.fmt.bufPrint(&print_buf, "{f}", .{basename}),
     );
 
     var basename_copy = basename;
