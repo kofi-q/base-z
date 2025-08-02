@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Zig
         run: |
-          zvm install 0.14.1
+          zvm install master
 
       - name: Checkout
         uses: actions/checkout@v4

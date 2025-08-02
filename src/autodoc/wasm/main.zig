@@ -967,26 +967,24 @@ export fn decl_type_html(decl_index: Decl.Index) String {
 const Oom = error{OutOfMemory};
 
 fn unpackInner(tar_bytes: []u8) !void {
-    var fbs = std.io.fixedBufferStream(tar_bytes);
+    var reader = std.Io.Reader.fixed(tar_bytes);
     var file_name_buffer: [1024]u8 = undefined;
     var link_name_buffer: [1024]u8 = undefined;
-    var it = std.tar.iterator(fbs.reader(), .{
+    var it = std.tar.Iterator.init(&reader, .{
         .file_name_buffer = &file_name_buffer,
         .link_name_buffer = &link_name_buffer,
     });
     while (try it.next()) |tar_file| {
         switch (tar_file.kind) {
             .file => {
-                if (tar_file.size == 0 and tar_file.name.len == 0) continue;
-                if (std.mem.startsWith(u8, tar_file.name, "std/")) continue;
-                if (std.mem.startsWith(u8, tar_file.name, "builtin/")) continue;
-
-                if (std.mem.containsAtLeast(u8, tar_file.name, 1, "/test/") or
+                if ((tar_file.size == 0 and tar_file.name.len == 0) or
+                    !std.mem.endsWith(u8, tar_file.name, ".zig") or
+                    std.mem.startsWith(u8, tar_file.name, "std/") or
+                    std.mem.startsWith(u8, tar_file.name, "builtin/") or
+                    std.mem.containsAtLeast(u8, tar_file.name, 1, "/test/") or
                     std.mem.containsAtLeast(u8, tar_file.name, 1, "/tests/") or
-                    std.mem.containsAtLeast(u8, tar_file.name, 1, "/testing/"))
-                    continue;
-
-                if (std.mem.endsWith(u8, tar_file.name, "test_cases.zig"))
+                    std.mem.containsAtLeast(u8, tar_file.name, 1, "/testing/") or
+                    std.mem.endsWith(u8, tar_file.name, "test_cases.zig"))
                     continue;
 
                 if (std.mem.endsWith(u8, tar_file.name, "test.zig")) {
@@ -997,12 +995,6 @@ fn unpackInner(tar_bytes: []u8) !void {
                     }
                 }
 
-                if (!std.mem.endsWith(u8, tar_file.name, ".zig")) {
-                    log.warn("skipping non-zig src: '{s}'", .{tar_file.name});
-                    continue;
-                }
-
-                log.debug("found file: '{s}'", .{tar_file.name});
                 const file_name = try gpa.dupe(u8, tar_file.name);
                 if (std.mem.indexOfScalar(u8, file_name, '/')) |pkg_name_end| {
                     const pkg_name = file_name[0..pkg_name_end];
@@ -1016,7 +1008,7 @@ fn unpackInner(tar_bytes: []u8) !void {
                         gop.value_ptr.* = file;
                     }
 
-                    const file_bytes = tar_bytes[fbs.pos..][0..@intCast(tar_file.size)];
+                    const file_bytes = tar_bytes[reader.seek..][0..@intCast(tar_file.size)];
                     assert(file == try Walk.add_file(file_name, file_bytes));
                 }
             },

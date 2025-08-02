@@ -33,17 +33,17 @@ fn make(step: *std.Build.Step, options: std.Build.Step.MakeOptions) !void {
     step.clearWatchInputs();
     try step.addWatchInput(remove_file.path);
 
-    const full_path = b.fmt("{}", .{remove_file.path.getPath3(b, step)});
+    const full_path = b.fmt("{f}", .{remove_file.path.getPath3(b, step)});
 
     b.build_root.handle.deleteFile(full_path) catch |err| switch (err) {
         error.FileNotFound => return,
         else => {
             if (b.build_root.path) |base| return step.fail(
-                "unable to delete file '{s}/{s}': {}",
+                "unable to delete file '{s}/{s}': {t}",
                 .{ base, full_path, err },
             );
 
-            return step.fail("unable to delete file '{s}': {}", .{
+            return step.fail("unable to delete file '{s}': {t}", .{
                 full_path, err,
             });
         },

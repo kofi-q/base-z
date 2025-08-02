@@ -34,6 +34,8 @@
     "anyerror",
     "anytype",
     "autodoc",
+    "bitflag",
+    "bitflags",
     "deinit",
     "doctest",
     "doctests",
