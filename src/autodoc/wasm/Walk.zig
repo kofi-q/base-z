@@ -542,7 +542,7 @@ fn parse(file_name: []const u8, source: anytype) Oom!Ast {
                 file_name,
                 err_loc.line + 1,
                 err_loc.column + 1,
-                rendered_err.getWritten(),
+                rendered_err.written(),
             });
         }
         return Ast.parse(gpa, "", .zig);
