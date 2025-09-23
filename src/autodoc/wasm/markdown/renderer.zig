@@ -189,7 +189,7 @@ pub fn renderInlineNodeText(
     doc: Document,
     node: Node.Index,
     writer: anytype,
-) @TypeOf(writer).Error!void {
+) !void {
     const data = doc.nodes.items(.data)[@intFromEnum(node)];
     switch (doc.nodes.items(.tag)[@intFromEnum(node)]) {
         .root,
@@ -230,11 +230,11 @@ pub fn renderInlineNodeText(
     }
 }
 
-pub fn fmtHtml(bytes: []const u8) std.fmt.Formatter([]const u8, formatHtml) {
+pub fn fmtHtml(bytes: []const u8) std.fmt.Alt([]const u8, formatHtml) {
     return .{ .data = bytes };
 }
 
-fn formatHtml(bytes: []const u8, writer: *std.io.Writer) std.io.Writer.Error!void {
+fn formatHtml(bytes: []const u8, writer: *std.Io.Writer) std.Io.Writer.Error!void {
     for (bytes) |b| {
         switch (b) {
             '<' => try writer.writeAll("&lt;"),

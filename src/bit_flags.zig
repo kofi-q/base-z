@@ -49,7 +49,7 @@ pub fn BitFlagsImpl(comptime T: type) type {
             return @bitCast(self);
         }
 
-        pub fn format(self: Self, writer: *std.io.Writer) !void {
+        pub fn format(self: Self, writer: *std.Io.Writer) !void {
             try writer.writeAll("{");
 
             var count: BackingInt = 0;
