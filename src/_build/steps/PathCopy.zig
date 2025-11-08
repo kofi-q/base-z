@@ -3,7 +3,7 @@
 //! during the build.
 
 const std = @import("std");
-const ArrayList = std.ArrayListUnmanaged;
+const ArrayList = std.ArrayList;
 
 const PathCopy = @This();
 

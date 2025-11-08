@@ -1,5 +1,5 @@
 const std = @import("std");
-const Writer = std.io.Writer;
+const Writer = std.Io.Writer;
 
 /// A collection structure, with an array and a length, to/from which bounded,
 /// variable-length slices can be written/read.

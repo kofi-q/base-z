@@ -34,7 +34,7 @@ pub const Annotation = struct {
 pub fn codeSnippetHtml(
     ast: std.zig.Ast,
     file_index: Walk.File.Index,
-    out: std.ArrayListUnmanaged(u8).Writer,
+    out: *std.Io.Writer,
     // root_node: Ast.Node.Index,
     options: RenderSourceOptions,
 ) !void {
@@ -43,7 +43,7 @@ pub fn codeSnippetHtml(
     // const ast = file.ast;
 
     const g = struct {
-        var field_access_buffer: std.ArrayListUnmanaged(u8) = .empty;
+        var field_access_buffer: std.ArrayList(u8) = .empty;
     };
 
     const start_token = ast.firstToken(root_node);
@@ -75,9 +75,8 @@ pub fn codeSnippetHtml(
             }
         } else if (between.len > 0) {
             if (options.collapse_whitespace) {
-                const list = out.context.self;
-                if (list.items.len > 0 and
-                    list.items[list.items.len - 1] != ' ')
+                if (out.end > 0 and
+                    out.buffer[out.end - 1] != ' ')
                 {
                     try out.writeByte(' ');
                 }
@@ -363,7 +362,7 @@ pub fn codeSnippetHtml(
 }
 
 fn appendUnindented(
-    out: std.ArrayListUnmanaged(u8).Writer,
+    out: *std.Io.Writer,
     s: []const u8,
     indent: usize,
 ) !void {
@@ -373,12 +372,12 @@ fn appendUnindented(
         try appendEscaped(out, line);
         is_first_line = false;
     } else {
-        try out.writeAll("\n");
+        try out.writeByte('\n');
         try appendEscaped(out, unindent(line, indent));
     };
 }
 
-pub fn appendEscaped(out: std.ArrayListUnmanaged(u8).Writer, s: []const u8) !void {
+pub fn appendEscaped(out: *std.Io.Writer, s: []const u8) !void {
     for (s) |c| try switch (c) {
         '&' => out.writeAll("&amp;"),
         '<' => out.writeAll("&lt;"),
@@ -390,7 +389,7 @@ pub fn appendEscaped(out: std.ArrayListUnmanaged(u8).Writer, s: []const u8) !voi
 
 fn walkFieldAccesses(
     file_index: Walk.File.Index,
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
     node: Ast.Node.Index,
 ) Oom!void {
     const ast = file_index.get_ast();
@@ -414,7 +413,7 @@ fn walkFieldAccesses(
 
 fn resolveIdentLink(
     file_index: Walk.File.Index,
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
     ident_token: Ast.TokenIndex,
 ) Oom!void {
     const decl_index = file_index.get().lookup_token(ident_token);
@@ -436,7 +435,7 @@ fn unindent(s: []const u8, indent: usize) []const u8 {
 
 pub fn resolveDeclLink(
     decl_index: Decl.Index,
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
 ) Oom!void {
     const decl = decl_index.get();
     switch (decl.categorize()) {
@@ -452,7 +451,7 @@ pub fn tmpFile(bytes: []u8) !Walk.File.Index {
             defer ast.deinit(gpa);
 
             const token_offsets = ast.tokens.items(.start);
-            var rendered_err: std.ArrayListUnmanaged(u8) = .{};
+            var rendered_err: std.ArrayList(u8) = .{};
             defer rendered_err.deinit(gpa);
             for (ast.errors) |err| {
                 const err_offset = token_offsets[err.token] + ast.errorOffset(err);

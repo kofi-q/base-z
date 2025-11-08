@@ -1,4 +1,4 @@
-const ArrayList = std.ArrayListUnmanaged;
+const ArrayList = std.ArrayList;
 const Decl = @This();
 const std = @import("std");
 const Ast = std.zig.Ast;
@@ -229,7 +229,7 @@ pub fn lookup(decl: *const Decl, name: []const u8) ?Decl.Index {
 }
 
 /// Appends the fully qualified name to `out`.
-pub fn fqn(decl: *const Decl, out: *std.ArrayListUnmanaged(u8)) Oom!void {
+pub fn fqn(decl: *const Decl, out: *std.ArrayList(u8)) Oom!void {
     const name = decl.extra_info().name;
 
     if (std.mem.eql(u8, name, "std") or
@@ -246,7 +246,7 @@ pub fn fqn(decl: *const Decl, out: *std.ArrayListUnmanaged(u8)) Oom!void {
 }
 
 /// Appends the fully qualified name to `out`.
-pub fn fqn2(decl: *const Decl, parent_idx: Decl.Index, out: *std.ArrayListUnmanaged(u8)) Oom!void {
+pub fn fqn2(decl: *const Decl, parent_idx: Decl.Index, out: *std.ArrayList(u8)) Oom!void {
     const name = decl.extra_info().name;
 
     if (std.mem.eql(u8, name, "std") or
@@ -268,7 +268,7 @@ pub fn fqn2(decl: *const Decl, parent_idx: Decl.Index, out: *std.ArrayListUnmana
 /// Appends the fully qualified name to `out`.
 pub fn fqnWrite(
     decl: *const Decl,
-    out: std.ArrayListUnmanaged(u8).Writer,
+    out: std.ArrayList(u8).Writer,
 ) !void {
     const name = decl.extra_info().name;
 
@@ -289,8 +289,8 @@ pub fn fqnWrite(
 pub fn fqn2Write(
     decl: *const Decl,
     parent_idx: Decl.Index,
-    out: std.ArrayListUnmanaged(u8).Writer,
-) Oom!void {
+    out: *std.Io.Writer,
+) !void {
     const name = decl.extra_info().name;
 
     if (std.mem.eql(u8, name, "std") or
@@ -299,7 +299,7 @@ pub fn fqn2Write(
 
     if (parent_idx == .none) {
         try decl.appendPath(out);
-        out.context.self.items.len -= 1; // remove the trailing '.'
+        out.end -= 1; // remove the trailing '.'
         return;
     }
 
@@ -309,12 +309,12 @@ pub fn fqn2Write(
     try out.writeAll(name);
 }
 
-pub fn reset_with_path(decl: *const Decl, list: *std.ArrayListUnmanaged(u8)) Oom!void {
+pub fn reset_with_path(decl: *const Decl, list: *std.ArrayList(u8)) Oom!void {
     list.clearRetainingCapacity();
     try append_path(decl, list);
 }
 
-pub fn append_path(decl: *const Decl, list: *std.ArrayListUnmanaged(u8)) Oom!void {
+pub fn append_path(decl: *const Decl, list: *std.ArrayList(u8)) Oom!void {
     const start = list.items.len;
     // Prefer the module name alias.
     for (Walk.modules.keys(), Walk.modules.values()) |pkg_name, pkg_file| {
@@ -342,9 +342,9 @@ pub fn append_path(decl: *const Decl, list: *std.ArrayListUnmanaged(u8)) Oom!voi
 
 pub fn appendPath(
     decl: *const Decl,
-    out: std.ArrayListUnmanaged(u8).Writer,
+    out: *std.Io.Writer,
 ) !void {
-    const start = out.context.self.items.len;
+    const start = out.end;
     // Prefer the module name alias.
     for (Walk.modules.keys(), Walk.modules.values()) |pkg_name, pkg_file| {
         if (pkg_file == decl.file) {
@@ -358,19 +358,18 @@ pub fn appendPath(
     // try out.ensureUnusedCapacity(gpa, file_path.len + 1);
     try out.writeAll(file_path);
 
-    const list = out.context.self;
-    for (list.items[start..]) |*byte| switch (byte.*) {
+    for (out.buffer[start..]) |*byte| switch (byte.*) {
         '/' => byte.* = '.',
         else => continue,
     };
-    if (std.mem.endsWith(u8, list.items, ".zig")) {
-        list.items.len -= 3;
+    if (std.mem.endsWith(u8, out.buffered(), ".zig")) {
+        out.end -= 3;
     } else {
         try out.writeByte('.');
     }
 }
 
-pub fn append_parent_ns(list: *std.ArrayListUnmanaged(u8), parent: Decl.Index) Oom!void {
+pub fn append_parent_ns(list: *std.ArrayList(u8), parent: Decl.Index) Oom!void {
     assert(parent != .none);
     const decl = parent.get();
     if (decl.parent != .none) {
@@ -380,7 +379,7 @@ pub fn append_parent_ns(list: *std.ArrayListUnmanaged(u8), parent: Decl.Index) O
     }
 }
 
-pub fn appendParentNs(out: std.ArrayListUnmanaged(u8).Writer, parent: Decl.Index) !void {
+pub fn appendParentNs(out: std.ArrayList(u8).Writer, parent: Decl.Index) !void {
     assert(parent != .none);
     const decl = parent.get();
     if (decl.parent != .none) {

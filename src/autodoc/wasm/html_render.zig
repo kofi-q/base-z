@@ -33,7 +33,7 @@ pub const Annotation = struct {
 
 pub fn fileSourceHtml(
     file_index: Walk.File.Index,
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
     root_node: Ast.Node.Index,
     options: RenderSourceOptions,
 ) !void {
@@ -41,7 +41,7 @@ pub fn fileSourceHtml(
     const file = file_index.get();
 
     const g = struct {
-        var field_access_buffer: std.ArrayListUnmanaged(u8) = .empty;
+        var field_access_buffer: std.ArrayList(u8) = .empty;
     };
 
     const start_token = ast.firstToken(root_node);
@@ -117,7 +117,7 @@ pub fn fileSourceHtml(
             if (next_annotate_index >= options.source_location_annotations.len) break;
             const next_annotation = options.source_location_annotations[next_annotate_index];
             if (cursor <= next_annotation.file_byte_offset) break;
-            try out.writer(gpa).print("<span id=\"{s}{d}\"></span>", .{
+            try out.print(gpa, "<span id=\"{s}{d}\"></span>", .{
                 options.annotation_prefix, next_annotation.dom_id,
             });
             next_annotate_index += 1;
@@ -387,7 +387,7 @@ pub fn fileSourceHtml(
 }
 
 fn appendUnindented(
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
     s: []const u8,
     indent: usize,
 ) !void {
@@ -404,7 +404,7 @@ fn appendUnindented(
     }
 }
 
-pub fn appendEscaped(out: *std.ArrayListUnmanaged(u8), s: []const u8) !void {
+pub fn appendEscaped(out: *std.ArrayList(u8), s: []const u8) !void {
     for (s) |c| {
         try out.ensureUnusedCapacity(gpa, 6);
         switch (c) {
@@ -419,7 +419,7 @@ pub fn appendEscaped(out: *std.ArrayListUnmanaged(u8), s: []const u8) !void {
 
 fn walkFieldAccesses(
     file_index: Walk.File.Index,
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
     node: Ast.Node.Index,
 ) Oom!void {
     const ast = file_index.get_ast();
@@ -443,7 +443,7 @@ fn walkFieldAccesses(
 
 fn resolveIdentLink(
     file_index: Walk.File.Index,
-    out: *std.ArrayListUnmanaged(u8),
+    out: *std.ArrayList(u8),
     ident_token: Ast.TokenIndex,
 ) Oom!void {
     const decl_index = file_index.get().lookup_token(ident_token);
@@ -463,7 +463,7 @@ fn unindent(s: []const u8, indent: usize) []const u8 {
     return s[indent_idx..];
 }
 
-pub fn resolveDeclLink(decl_index: Decl.Index, out: *std.ArrayListUnmanaged(u8)) Oom!void {
+pub fn resolveDeclLink(decl_index: Decl.Index, out: *std.ArrayList(u8)) Oom!void {
     const decl = decl_index.get();
     switch (decl.categorize()) {
         .alias => |alias_decl| try alias_decl.get().fqn(out),
