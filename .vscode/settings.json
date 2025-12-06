@@ -27,8 +27,6 @@
     "**/.zig-cache": true,
     "**/zig-out": true
   },
-  "zig.zls.enableBuildOnSave": true,
-  "zig.zls.buildOnSaveArgs": ["check"],
   "cSpell.words": [
     "aliasee",
     "anyerror",
@@ -43,5 +41,9 @@
     "usingnamespace",
     "usize"
   ],
-  "cSpell.enabled": true
+  "cSpell.enabled": true,
+  "zig.buildOnSaveProvider": "zls",
+  "zig.buildOnSaveArgs": [
+    "check"
+  ]
 }
