@@ -1086,9 +1086,6 @@ export fn get_aliasee() Decl.Index {
 }
 
 export fn categorize_decl(decl_index: Decl.Index, resolve_alias_count: usize) Walk.Category.Tag {
-    Walk.looking_for_gold = true;
-    defer Walk.looking_for_gold = false;
-
     global_aliasee = .none;
     var chase_alias_n = resolve_alias_count;
     var decl = decl_index.get();
