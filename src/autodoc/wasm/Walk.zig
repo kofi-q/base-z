@@ -55,8 +55,6 @@ pub const Category = union(enum(u8)) {
     };
 };
 
-pub var looking_for_gold = false;
-
 pub const File = struct {
     ast: Ast,
     /// Maps identifiers to the declarations they point to.
@@ -906,8 +904,6 @@ fn expr(
             }
             try w.expr(scope, parent_decl, full.ast.template);
         },
-
-        .asm_legacy => {},
 
         .builtin_call_two,
         .builtin_call_two_comma,
