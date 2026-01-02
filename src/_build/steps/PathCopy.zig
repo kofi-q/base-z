@@ -68,14 +68,20 @@ fn make(step: *std.Build.Step, options: std.Build.Step.MakeOptions) !void {
     const self: *PathCopy = @fieldParentPtr("step", step);
     step.clearWatchInputs();
 
-    var cwd = try std.fs.cwd().openDir(".", .{ .iterate = true });
-    defer cwd.close();
+    var io_threaded = std.Io.Threaded.init(b.allocator, .{});
+    defer io_threaded.deinit();
+    const io = io_threaded.ioBasic();
+
+    var cwd = try std.Io.Dir.cwd().openDir(io, ".", .{ .iterate = true });
+    defer cwd.close(io);
 
     for (self.paths.items) |path| {
         try step.addWatchInput(path.source);
 
         const stat = try cwd.statFile(
+            io,
             try path.source.getPath3(b, step).toString(b.allocator),
+            .{},
         );
 
         _ = switch (stat.kind) {

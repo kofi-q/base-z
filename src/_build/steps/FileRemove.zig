@@ -35,7 +35,11 @@ fn make(step: *std.Build.Step, options: std.Build.Step.MakeOptions) !void {
 
     const full_path = b.fmt("{f}", .{remove_file.path.getPath3(b, step)});
 
-    b.build_root.handle.deleteFile(full_path) catch |err| switch (err) {
+    var io_threaded = std.Io.Threaded.init(b.allocator, .{});
+    defer io_threaded.deinit();
+    const io = io_threaded.ioBasic();
+
+    b.build_root.handle.deleteFile(io, full_path) catch |err| switch (err) {
         error.FileNotFound => return,
         else => {
             if (b.build_root.path) |base| return step.fail(
