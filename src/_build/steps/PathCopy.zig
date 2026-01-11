@@ -68,10 +68,7 @@ fn make(step: *std.Build.Step, options: std.Build.Step.MakeOptions) !void {
     const self: *PathCopy = @fieldParentPtr("step", step);
     step.clearWatchInputs();
 
-    var io_threaded = std.Io.Threaded.init(b.allocator, .{});
-    defer io_threaded.deinit();
-    const io = io_threaded.ioBasic();
-
+    const io = b.graph.io;
     var cwd = try std.Io.Dir.cwd().openDir(io, ".", .{ .iterate = true });
     defer cwd.close(io);
 

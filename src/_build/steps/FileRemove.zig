@@ -10,16 +10,16 @@ const FileRemove = @This();
 path: std.Build.LazyPath,
 step: std.Build.Step,
 
-pub fn create(owner: *std.Build, path: std.Build.LazyPath) *FileRemove {
-    const remove_file = owner.allocator.create(FileRemove) catch @panic("OOM");
+pub fn create(b: *std.Build, path: std.Build.LazyPath) *FileRemove {
+    const remove_file = b.allocator.create(FileRemove) catch @panic("OOM");
     remove_file.* = .{
         .step = .init(.{
             .id = std.Build.Step.Id.custom,
-            .name = owner.fmt("FileRemove {s}", .{path.getDisplayName()}),
-            .owner = owner,
+            .name = b.fmt("FileRemove {s}", .{path.getDisplayName()}),
+            .owner = b,
             .makeFn = make,
         }),
-        .path = path.dupe(owner),
+        .path = path.dupe(b),
     };
     return remove_file;
 }
@@ -35,10 +35,7 @@ fn make(step: *std.Build.Step, options: std.Build.Step.MakeOptions) !void {
 
     const full_path = b.fmt("{f}", .{remove_file.path.getPath3(b, step)});
 
-    var io_threaded = std.Io.Threaded.init(b.allocator, .{});
-    defer io_threaded.deinit();
-    const io = io_threaded.ioBasic();
-
+    const io = b.graph.io;
     b.build_root.handle.deleteFile(io, full_path) catch |err| switch (err) {
         error.FileNotFound => return,
         else => {
