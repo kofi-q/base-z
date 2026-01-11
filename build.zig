@@ -3,6 +3,7 @@ const std = @import("std");
 const _build = @import("src/_build.zig");
 
 pub const addDocs = _build.addDocs;
+pub const addDirRemove = _build.addDirRemove;
 pub const addFileRemove = _build.addFileRemove;
 pub const addPathsCopy = _build.addPathsCopy;
 pub const steps = _build.steps;

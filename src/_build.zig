@@ -89,6 +89,10 @@ pub fn autodocMain(b: *std.Build) *std.Build.Step.Compile {
     return exe;
 }
 
+pub fn addDirRemove(b: *std.Build, path: std.Build.LazyPath) *steps.DirRemove {
+    return steps.DirRemove.create(b, path);
+}
+
 pub fn addFileRemove(
     b: *std.Build,
     path: std.Build.LazyPath,
