@@ -8,7 +8,7 @@ const ArrayList = std.ArrayList;
 const PathCopy = @This();
 
 generated_directory: std.Build.GeneratedFile,
-paths: ArrayList(Path) = .{},
+paths: ArrayList(Path) = .empty,
 step: std.Build.Step,
 write_files: *std.Build.Step.WriteFile,
 

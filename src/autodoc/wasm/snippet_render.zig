@@ -451,7 +451,7 @@ pub fn tmpFile(bytes: []u8) !Walk.File.Index {
             defer ast.deinit(gpa);
 
             const token_offsets = ast.tokens.items(.start);
-            var rendered_err: std.ArrayList(u8) = .{};
+            var rendered_err: std.ArrayList(u8) = .empty;
             defer rendered_err.deinit(gpa);
             for (ast.errors) |err| {
                 const err_offset = token_offsets[err.token] + ast.errorOffset(err);
