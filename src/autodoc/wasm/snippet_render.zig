@@ -330,7 +330,6 @@ pub fn codeSnippetHtml(
             .minus_pipe_equal,
             .asterisk,
             .asterisk_equal,
-            .asterisk_asterisk,
             .asterisk_percent,
             .asterisk_percent_equal,
             .asterisk_pipe,
@@ -356,7 +355,7 @@ pub fn codeSnippetHtml(
             .tilde,
             => try appendEscaped(out, slice),
 
-            .invalid, .invalid_periodasterisks => return error.InvalidToken,
+            .invalid => return error.InvalidToken,
         }
     }
 }

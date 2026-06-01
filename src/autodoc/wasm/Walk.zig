@@ -821,7 +821,6 @@ fn expr(
         .less_or_equal,
         .array_cat,
 
-        .array_mult,
         .error_union,
         .merge_error_sets,
         .bool_and,
