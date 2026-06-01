@@ -20,7 +20,7 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //! THE SOFTWARE.
 //!
-//! Modified compatibility with Zig 0.16.0-dev Io API changes.
+//! Modified for compatibility with Zig 0.16.0 Io API changes.
 
 const std = @import("std");
 const fs = std.fs;

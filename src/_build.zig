@@ -49,9 +49,9 @@ pub fn addDocs(
     _ = patch.addCopyFile(main_wasm, "main.wasm");
 
     patch.step.dependOn(&original.step);
-    patch.step.addWatchInput(main_js) catch @panic("OOM");
-    patch.step.addWatchInput(main_css) catch @panic("OOM");
-    patch.step.addWatchInput(main_wasm) catch @panic("OOM");
+    main_js.addStepDependencies(&patch.step);
+    main_css.addStepDependencies(&patch.step);
+    main_wasm.addStepDependencies(&patch.step);
 
     const patch_install = b.addInstallDirectory(.{
         .source_dir = patch.getDirectory(),
